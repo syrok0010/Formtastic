@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---- Модели для Auth.js (NextAuth.js) ----
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---- Ваши модели ----
+
+enum UserRole {
+  SURVEY_CREATOR
+  SURVEY_RESPONDENT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole? // Роль опциональна, будет выбрана после первого логина
+
+  accounts Account[]
+  sessions Session[]
+
+  createdSurveys Survey[]       @relation("CreatedSurveys")
+  responses      UserResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+model Survey {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  isPublic    Boolean  @default(true)
+  status      SurveyStatus @default(DRAFT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creatorId   String
+  creator     User     @relation("CreatedSurveys", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  responses UserResponse[]
+
+  @@index([creatorId])
+}
+
+enum QuestionType {
+  TEXT
+  NUMBER
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+model Question {
+  id         Int          @id @default(autoincrement())
+  text       String
+  type       QuestionType
+  isRequired Boolean      @default(true)
+  order      Int
+
+  surveyId   Int
+  survey     Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  options    AnswerOption[]
+  answers    Answer[]
+
+  @@unique([surveyId, order])
+  @@index([surveyId])
+}
+
+model AnswerOption {
+  id   Int    @id @default(autoincrement())
+  text String
+  order Int
+
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  singleChoiceAnswers   Answer[] @relation("SingleChoiceSelection")
+  multipleChoiceAnswers AnswerSelectedOption[]
+
+  @@unique([questionId, order])
+  @@index([questionId])
+}
+
+model UserResponse {
+  id          Int      @id @default(autoincrement())
+  submittedAt DateTime @default(now())
+
+  surveyId    Int
+  survey      Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  userId      String?  // Опционально для анонимных ответов
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  answers     Answer[]
+
+  @@unique([surveyId, userId], name: "unique_user_survey_response")
+  @@index([surveyId])
+  @@index([userId])
+}
+
+model Answer {
+  id             Int      @id @default(autoincrement())
+  userResponseId Int
+  userResponse   UserResponse @relation(fields: [userResponseId], references: [id], onDelete: Cascade)
+  questionId     Int
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  textValue        String?
+  numberValue      Float?
+  selectedOptionId Int?
+  selectedOption   AnswerOption? @relation("SingleChoiceSelection", fields: [selectedOptionId], references: [id], onDelete: SetNull)
+  chosenOptions    AnswerSelectedOption[]
+  @@unique([userResponseId, questionId])
+  @@index([userResponseId])
+  @@index([questionId])
+  @@index([selectedOptionId])
+}
+
+model AnswerSelectedOption {
+  answerId Int
+  answer   Answer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  optionId Int
+  option   AnswerOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  @@id([answerId, optionId])
+  @@index([optionId])
+}
