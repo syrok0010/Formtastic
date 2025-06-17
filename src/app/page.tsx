@@ -1,5 +1,6 @@
 import { signIn, signOut } from "@/auth";
 import Image from "next/image";
+import UserAvatar from "./Components/UserAvatar";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
     >
       <button type="submit">Sign Out</button>
     </form>
+    <UserAvatar></UserAvatar>
         <Image
           className="dark:invert"
           src="/next.svg"
