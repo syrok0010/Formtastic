@@ -1,4 +1,4 @@
-﻿import {auth} from "@/auth";
+import {auth} from "@/auth";
 import {redirect} from "next/navigation";
 import Link from "next/link";
 import { UserRole, SurveyStatus } from "@/generated/prisma";
@@ -19,8 +19,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, BarChart, Pencil, Trash2, FileText, Users } from "lucide-react";
+import {MoreHorizontal, BarChart, Pencil, Trash2, FileText, Users, ListPlus} from "lucide-react";
 import {getSurveysByCreatorId} from "@/app/admin/actions";
+import {ExpandableButton} from "@/components/ui/expandable-button";
+import {createSurveyAction} from "@/app/actions";
 
 
 const SurveyStatusBadge = ({ status }: { status: SurveyStatus }) => {
@@ -48,6 +50,12 @@ export default async function AllSurveys() {
         <div className="container mx-auto py-10">
             <header className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Мои опросы</h1>
+                <ExpandableButton
+                    buttonText="Добавить опрос"
+                    placeholderText="Название нового опроса"
+                    onSubmitAction={createSurveyAction}
+                    icon={<ListPlus className="mr-2 h-4 w-4" />}
+                />
             </header>
 
             {surveys.length > 0 ? (
