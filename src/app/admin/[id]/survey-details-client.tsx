@@ -27,6 +27,23 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import { updateSurveyAction } from "@/app/admin/actions";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { SortableQuestionItem } from "./sortable-question-item";
 
 interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
@@ -52,6 +69,36 @@ export function SurveyDetailsClient({
     updateSurveyAction,
     initialState,
   );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSurvey((prev) => {
+        const oldIndex = prev.questions.findIndex((q) => q.id === active.id);
+        const newIndex = prev.questions.findIndex((q) => q.id === over.id);
+
+        const newQuestions = arrayMove(prev.questions, oldIndex, newIndex);
+
+        const reorderedQuestions = newQuestions.map((q, index) => ({
+          ...q,
+          order: index,
+        }));
+
+        return {
+          ...prev,
+          questions: reorderedQuestions as any,
+        };
+      });
+    }
+  }
 
   const handleValueChange = (name: string, value: string | boolean) => {
     setSurvey((prev) => ({ ...prev, [name]: value }));
@@ -209,112 +256,131 @@ export function SurveyDetailsClient({
 
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold tracking-tight">Вопросы</h2>
-        <div className="space-y-4">
-          {survey.questions.map((question, qIndex) => (
-            <Card key={question.id}>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Вопрос {qIndex + 1}</CardTitle>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeQuestion(qIndex)}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label>Текст вопроса</Label>
-                    <Input
-                      value={question.text}
-                      onChange={(e) =>
-                        handleQuestionValueChange(
-                          qIndex,
-                          "text",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Тип вопроса</Label>
-                    <Select
-                      value={question.type}
-                      onValueChange={(value) =>
-                        handleQuestionValueChange(qIndex, "type", value)
-                      }
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          modifiers={[restrictToVerticalAxis]}
+        >
+          <SortableContext
+            items={survey.questions.map((q) => q.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {survey.questions.map((question, qIndex) => (
+              <SortableQuestionItem key={question.id} id={question.id}>
+                <Card key={question.id}>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Вопрос {qIndex + 1}</CardTitle>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeQuestion(qIndex)}
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(QuestionType).map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`isRequired-${qIndex}`}
-                    checked={question.isRequired}
-                    onCheckedChange={(checked) =>
-                      handleQuestionValueChange(qIndex, "isRequired", !!checked)
-                    }
-                  />
-                  <Label
-                    htmlFor={`isRequired-${qIndex}`}
-                    className="cursor-pointer"
-                  >
-                    Обязательный вопрос
-                  </Label>
-                </div>
-
-                {(question.type === QuestionType.SINGLE_CHOICE ||
-                  question.type === QuestionType.MULTIPLE_CHOICE) && (
-                  <div className="pt-4 border-t space-y-3">
-                    <h4 className="text-sm font-medium">Варианты ответа</h4>
-                    {question.options.map((option, optIndex) => (
-                      <div key={option.id} className="flex items-center gap-2">
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2 space-y-2">
+                        <Label>Текст вопроса</Label>
                         <Input
-                          value={option.text}
+                          value={question.text}
                           onChange={(e) =>
-                            handleOptionTextChange(
+                            handleQuestionValueChange(
                               qIndex,
-                              optIndex,
+                              "text",
                               e.target.value,
                             )
                           }
                         />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Тип вопроса</Label>
+                        <Select
+                          value={question.type}
+                          onValueChange={(value) =>
+                            handleQuestionValueChange(qIndex, "type", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(QuestionType).map((t) => (
+                              <SelectItem key={t} value={t}>
+                                {t}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`isRequired-${qIndex}`}
+                        checked={question.isRequired}
+                        onCheckedChange={(checked) =>
+                          handleQuestionValueChange(
+                            qIndex,
+                            "isRequired",
+                            !!checked,
+                          )
+                        }
+                      />
+                      <Label
+                        htmlFor={`isRequired-${qIndex}`}
+                        className="cursor-pointer"
+                      >
+                        Обязательный вопрос
+                      </Label>
+                    </div>
+
+                    {(question.type === QuestionType.SINGLE_CHOICE ||
+                      question.type === QuestionType.MULTIPLE_CHOICE) && (
+                      <div className="pt-4 border-t space-y-3">
+                        <h4 className="text-sm font-medium">Варианты ответа</h4>
+                        {question.options.map((option, optIndex) => (
+                          <div
+                            key={option.id}
+                            className="flex items-center gap-2"
+                          >
+                            <Input
+                              value={option.text}
+                              onChange={(e) =>
+                                handleOptionTextChange(
+                                  qIndex,
+                                  optIndex,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeOption(qIndex, optIndex)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
                         <Button
                           type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeOption(qIndex, optIndex)}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addOption(qIndex)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Plus className="mr-2 h-4 w-4" /> Добавить вариант
                         </Button>
                       </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addOption(qIndex)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> Добавить вариант
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </SortableQuestionItem>
+            ))}
+          </SortableContext>
+        </DndContext>
         <Button
           type="button"
           variant="outline"

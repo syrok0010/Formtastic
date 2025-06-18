@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma, UserRole } from "@/generated/prisma";
 import { forbidden, notFound, redirect } from "next/navigation";
-import {SurveyDetailsClient} from "@/app/admin/[id]/survey-details-client";
+import { SurveyDetailsClient } from "@/app/admin/[id]/survey-details-client";
 
 const surveyDetailSelect = {
   id: true,
@@ -79,7 +79,5 @@ export default async function SurveyPage({
 
   if (!survey || survey.creatorId !== session.user.id) notFound();
 
-  return (
-      <SurveyDetailsClient initialSurvey={survey} />
-  );
+  return <SurveyDetailsClient initialSurvey={survey} />;
 }
