@@ -58,7 +58,7 @@ export type SurveyDetailPayload = Prisma.SurveyGetPayload<{
 export default async function SurveyPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const session = await auth();
 
