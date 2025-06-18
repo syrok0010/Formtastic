@@ -38,7 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           data: { role: role },
         });
       } else if (dbUser.role !== role) {
-        return `/login?error=RoleMismatch`;
+        return `/?error=RoleMismatch`;
       }
 
       (await cookies()).delete("selected_role");
