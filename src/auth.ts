@@ -17,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "google") return true; // Пропускаем другие провайдеры
+      if (account?.provider !== "google") return true;
 
       const roleCookie = (await cookies()).get("selected_role");
       if (!roleCookie?.value) return false;
