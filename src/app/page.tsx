@@ -1,6 +1,6 @@
 import { signIn, signOut } from "@/auth";
 import Image from "next/image";
-import UserAvatar from "./Components/UserAvatar";
+import UserAvatar from "../components/ui/userAvatar";
 
 export default function Home() {
   return (
