@@ -77,19 +77,13 @@ export default async function AllSurveys() {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Действия</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        <Link href={`/surveys/${survey.id}`} passHref>
-                                            <DropdownMenuItem>
-                                                <FileText className="mr-2 h-4 w-4" />
-                                                Просмотр
-                                            </DropdownMenuItem>
-                                        </Link>
-                                        <Link href={`/surveys/${survey.id}/results`} passHref>
+                                        <Link href={`/admin/${survey.id}/results`} passHref>
                                             <DropdownMenuItem>
                                                 <BarChart className="mr-2 h-4 w-4" />
                                                 Результаты
                                             </DropdownMenuItem>
                                         </Link>
-                                        <Link href={`/surveys/${survey.id}/edit`} passHref>
+                                        <Link href={`/admin/${survey.id}/edit`} passHref>
                                             <DropdownMenuItem>
                                                 <Pencil className="mr-2 h-4 w-4" />
                                                 Редактировать

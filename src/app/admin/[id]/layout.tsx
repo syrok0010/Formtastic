@@ -3,20 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma";
 import { notFound, redirect } from "next/navigation";
 import { TabsNav } from "./tabs-nav";
+import React from "react";
 
 export default async function SurveyAdminLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id || session.user.role !== UserRole.SURVEY_CREATOR) {
     redirect("/api/auth/signin");
   }
 
-  const surveyId = parseInt(params.id, 10);
+  const surveyId = parseInt((await params).id, 10);
   if (isNaN(surveyId)) {
     notFound();
   }
