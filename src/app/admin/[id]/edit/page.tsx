@@ -1,8 +1,7 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, UserRole } from "@/generated/prisma";
-import { forbidden, notFound, redirect } from "next/navigation";
-import { SurveyDetailsClient } from "@/app/admin/[id]/survey-details-client";
+import { Prisma } from "@/generated/prisma";
+import { notFound } from "next/navigation";
+import { SurveyDetailsClient } from "@/app/admin/[id]/edit/survey-details-client";
 
 const surveyDetailSelect = {
   id: true,
@@ -60,24 +59,15 @@ export default async function SurveyPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await auth();
-
-  if (!session?.user?.id) redirect("/login");
-
-  if (session.user.role !== UserRole.SURVEY_CREATOR) forbidden();
-
   const surveyId = parseInt((await params).id, 10);
-
   if (isNaN(surveyId)) notFound();
 
   const survey = await prisma.survey.findUnique({
-    where: {
-      id: surveyId,
-    },
+    where: { id: surveyId },
     select: surveyDetailSelect,
   });
 
-  if (!survey || survey.creatorId !== session.user.id) notFound();
+  if (!survey) notFound();
 
   return <SurveyDetailsClient initialSurvey={survey} />;
 }

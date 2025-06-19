@@ -44,7 +44,10 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableQuestionItem } from "./sortable-question-item";
-import {localizedQuestionTypes, localizedSurveyStatuses} from "@/lib/localization";
+import {
+  localizedQuestionTypes,
+  localizedSurveyStatuses,
+} from "@/lib/localization";
 
 interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
@@ -175,13 +178,10 @@ export function SurveyDetailsClient({
   };
 
   return (
-    <form
-      action={formAction}
-      className="container mx-auto py-8 max-w-4xl space-y-8"
-    >
+    <form action={formAction} className="container py-4 max-w-5xl space-y-8">
       <input type="hidden" name="surveyData" value={JSON.stringify(survey)} />
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
           Редактирование опроса
         </h1>

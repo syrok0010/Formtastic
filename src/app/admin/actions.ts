@@ -133,7 +133,8 @@ export async function updateSurveyAction(
             }
         });
 
-        revalidatePath(`/surveys/${surveyId}`);
+        revalidatePath(`/admin/${surveyId}/edit`);
+        revalidatePath(`/admin/${surveyId}/results`);
 
         return { success: true, message: "Опрос успешно сохранен!" };
 
