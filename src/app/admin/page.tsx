@@ -55,7 +55,7 @@ export default async function AllSurveys() {
   const surveys = await getSurveysByCreatorId(session.user.id);
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto p-10">
       <header className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Мои опросы</h1>
         <ExpandableButton
@@ -77,7 +77,7 @@ export default async function AllSurveys() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                      <Button aria-haspopup="true" size="icon" variant="ghost" className="cursor-pointer">
                         <MoreHorizontal className="h-4 w-4" />
                         <span className="sr-only">Открыть меню</span>
                       </Button>
