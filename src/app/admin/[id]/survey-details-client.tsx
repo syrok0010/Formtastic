@@ -44,6 +44,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableQuestionItem } from "./sortable-question-item";
+import {localizedQuestionTypes, localizedSurveyStatuses} from "@/lib/localization";
 
 interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
@@ -232,7 +233,7 @@ export function SurveyDetailsClient({
                 <SelectContent>
                   {Object.values(SurveyStatus).map((s) => (
                     <SelectItem key={s} value={s}>
-                      {s}
+                      {localizedSurveyStatuses[s]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -309,7 +310,7 @@ export function SurveyDetailsClient({
                           <SelectContent>
                             {Object.values(QuestionType).map((t) => (
                               <SelectItem key={t} value={t}>
-                                {t}
+                                {localizedQuestionTypes[t]}
                               </SelectItem>
                             ))}
                           </SelectContent>
