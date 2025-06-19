@@ -8,7 +8,7 @@ export default async function LoginPage() {
 
   if (!session) return <LoginForm />;
 
-  switch (session.user.id) {
+  switch (session.user.role) {
     case UserRole.SURVEY_CREATOR:
       redirect("/admin");
     case UserRole.SURVEY_RESPONDENT:

@@ -48,7 +48,7 @@ export default function LoginForm() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40 p-4">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold">Добро пожаловать!</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Для начала, пожалуйста, выберите вашу роль.
         </p>
       </div>

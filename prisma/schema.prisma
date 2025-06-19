@@ -47,7 +47,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ---- Ваши модели ----
+// ---- Доменные модели ----
 
 enum UserRole {
   SURVEY_CREATOR
