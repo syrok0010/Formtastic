@@ -231,7 +231,14 @@ export function SurveyDetailsClient({
               </SelectTrigger>
               <SelectContent>
                 {Object.values(SurveyStatus).map((s) => (
-                  <SelectItem key={s} value={s}>
+                  <SelectItem
+                    disabled={
+                      survey.status !== SurveyStatus.DRAFT &&
+                      s == SurveyStatus.DRAFT
+                    }
+                    key={s}
+                    value={s}
+                  >
                     {localizedSurveyStatuses[s]}
                   </SelectItem>
                 ))}

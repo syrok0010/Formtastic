@@ -35,7 +35,6 @@ export default async function SurveyAdminLayout({
     <div className="container mx-auto py-8 max-w-5xl space-y-6 @5xl:px-0 px-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">{survey.title}</h1>
-        <p className="text-muted-foreground">Панель управления опросом</p>
       </div>
       <TabsNav surveyId={survey.id} />
       <main>{children}</main>
