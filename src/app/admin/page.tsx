@@ -56,7 +56,7 @@ export default async function AllSurveys() {
 
   return (
     <div className="container mx-auto p-10">
-      <header className="flex items-center justify-between mb-8">
+      <header className="flex flex-wrap gap-4 items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Мои опросы</h1>
         <ExpandableButton
           buttonText="Добавить опрос"
