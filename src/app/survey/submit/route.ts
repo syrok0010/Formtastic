@@ -3,21 +3,21 @@ import {prisma} from '@/lib/prisma';
 import { QuestionType } from '@/generated/prisma';
 
 interface SubmitRequestBody {
-    quizId: number;
+    surveyId: number;
     answers: Record<string, any>;
 }
 
 export async function POST(req: Request) {
     try {
         const body: SubmitRequestBody = await req.json();
-        const { quizId, answers } = body;
+        const { surveyId, answers } = body;
 
-        if (!quizId || !answers || Object.keys(answers).length === 0) {
+        if (!surveyId || !answers || Object.keys(answers).length === 0) {
             return NextResponse.json({ error: 'Отсутствуют необходимые данные' }, { status: 400 });
         }
 
         const questions = await prisma.question.findMany({
-            where: { surveyId: quizId },
+            where: { surveyId: surveyId },
             select: { id: true, type: true },
         });
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         const result = await prisma.$transaction(async (tx) => {
             const userResponse = await tx.userResponse.create({
                 data: {
-                    surveyId: quizId,
+                    surveyId: surveyId,
                 },
             });
 

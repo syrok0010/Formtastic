@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Prisma } from '@/generated/prisma';
+import {AnswerOption, Question, Survey} from '@/generated/prisma';
 
 import { QuestionCard } from './QuestionCard';
 import { ProgressBar } from './ProgressBar';
@@ -10,27 +10,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const surveyWithDetailsQuery = Prisma.validator<Prisma.SurveyDefaultArgs>()({
-    include: {
-        questions: {
-            include: {
-                options: {
-                    orderBy: { order: 'asc' },
-                },
-            },
-            orderBy: { order: 'asc' },
-        },
-    },
-});
-type SurveyWithDetails = Prisma.SurveyGetPayload<typeof surveyWithDetailsQuery>;
+export type FullSurvey = Survey & {
+    questions: (Question & {
+        options: AnswerOption[];
+    })[];
+};
 
-
-export function QuizClientForm({ survey }: { survey: SurveyWithDetails }) {
+export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
     const router = useRouter();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, any>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     const currentQuestion = survey.questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
@@ -40,9 +32,23 @@ export function QuizClientForm({ survey }: { survey: SurveyWithDetails }) {
             ...prev,
             [currentQuestion.id]: answer,
         }));
+        setValidationError(null);
     };
 
+    const validateCurrentAnswer = () => {
+        if (currentQuestion.isRequired) {
+            const answer = answers[currentQuestion.id];
+            if (answer === undefined || answer === null || answer === '' || (Array.isArray(answer) && answer.length === 0)) {
+                setValidationError('Это обязательный вопрос. Пожалуйста, дайте ответ.');
+                return false;
+            }
+        }
+        return true;
+    }
+
     const handleNext = () => {
+        if (!validateCurrentAnswer()) return;
+
         if (!isLastQuestion) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
@@ -56,28 +62,36 @@ export function QuizClientForm({ survey }: { survey: SurveyWithDetails }) {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+
+        if (!validateCurrentAnswer()) return;
+
         setIsSubmitting(true);
         setError(null);
 
         try {
-            const response = await fetch('/api/quiz/submit', {
+            const response = await fetch('/survey/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
-                    quizId: survey.id,
+                    surveyId: survey.id,
                     answers: answers,
                 }),
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
-                throw new Error(result.error || 'Не удалось отправить ответы');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Произошла ошибка при отправке данных.');
             }
 
-            router.push(`/quiz/${survey.id}/results/${result.userResponseId}`);
+            console.log('Опрос успешно пройден!');
+            router.push('/');
+
         } catch (err: any) {
-            setError(err.message);
+            console.error('Ошибка при отправке опроса:', err);
+            setError(err.message || 'Произошла непредвиденная ошибка. Попробуйте снова.');
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -102,11 +116,7 @@ export function QuizClientForm({ survey }: { survey: SurveyWithDetails }) {
                         />
 
                         <QuestionCard
-                            questionId={currentQuestion.id.toString()}
-                            title={currentQuestion.text}
-                            required={currentQuestion.isRequired}
-                            type={currentQuestion.type as 'single_choice' | 'multiple_choice' | 'text' | 'NUMBER'}
-                            options={currentQuestion.options.map(opt => ({ id: opt.id.toString(), text: opt.text }))}
+                            question={currentQuestion}
                             answer={answers[currentQuestion.id]}
                             onAnswerChange={handleAnswerChange}
                         />

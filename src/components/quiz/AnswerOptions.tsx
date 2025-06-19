@@ -1,11 +1,11 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import {AnswerOption, QuestionType} from "@/generated/prisma";
 
 interface AnswerOptionsProps {
   questionId: string;
-  type: 'single_choice' | 'multiple_choice' | 'text' | 'rating' | 'boolean' | 'NUMBER';
-  options?: { id: string; text: string; }[];
-  maxRating?: number;
+  type: QuestionType;
+  options?: AnswerOption[];
   value: any;
   onChange: (value: any) => void;
 }
@@ -14,9 +14,8 @@ export const AnswerOptions: React.FC<AnswerOptionsProps> = ({
                                                               questionId,
                                                               type,
                                                               options,
-                                                              maxRating = 5,
-                                                              value,
-                                                              onChange,
+                                                                value,
+                                                                onChange,
                                                             }) => {
   const renderSingleChoice = () => (
       <div className="space-y-3">
@@ -82,13 +81,13 @@ export const AnswerOptions: React.FC<AnswerOptionsProps> = ({
   );
 
   switch (type) {
-    case 'single_choice'.toUpperCase():
+    case QuestionType.SINGLE_CHOICE:
       return renderSingleChoice();
-    case 'multiple_choice'.toUpperCase():
+    case QuestionType.MULTIPLE_CHOICE:
       return renderMultipleChoice();
-    case 'text'.toUpperCase():
+    case QuestionType.TEXT:
       return renderTextInput();
-    case 'NUMBER':
+    case QuestionType.NUMBER:
       return renderNumberInput();
     default:
       return <div>Неподдерживаемый тип вопроса: {type}</div>;
