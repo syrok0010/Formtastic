@@ -94,7 +94,7 @@ export const ExpandableButton = ({
         "relative flex items-center justify-center h-12 rounded-full cursor-pointer",
         isExpanded
           ? "bg-background shadow-lg"
-          : "bg-primary text-primary-foreground",
+          : "bg-primary text-primary-foreground hover:bg-primary/90",
       )}
     >
       <motion.div
