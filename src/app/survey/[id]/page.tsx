@@ -5,7 +5,8 @@ import Footer from '@/components/common/Footer';
 import { SurveyClientForm } from '@/components/quiz/SurveyClientForm';
 
 export default async function SurveyPage({ params }: { params: { id: string } }) {
-    const surveyId = parseInt(params.id, 10);
+    const { id } = await params;
+    const surveyId = parseInt(id, 10);
     if (isNaN(surveyId)) {
         notFound();
     }

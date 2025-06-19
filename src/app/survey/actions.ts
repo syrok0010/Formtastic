@@ -41,12 +41,8 @@ export async function submitSurvey(surveyId: number, answers: Answers): Promise<
                     return;
                 }
 
-                if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
-                    return;
-                }
-
                 if (questionType === QuestionType.MULTIPLE_CHOICE) {
-                    if (!Array.isArray(value)) return;
+                    if (!Array.isArray(value)) value = [];
                     const answerRecord = await tx.answer.create({
                         data: {
                             userResponseId: userResponse.id,
@@ -77,7 +73,7 @@ export async function submitSurvey(surveyId: number, answers: Answers): Promise<
             return { userResponseId: userResponse.id };
         });
 
-        revalidatePath('/');
+        revalidatePath(`/survey/${surveyId}`);
 
         return { success: true, userResponseId: result.userResponseId };
 

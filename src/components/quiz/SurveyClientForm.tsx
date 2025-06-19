@@ -24,6 +24,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [isFinished, setIsFinished] = useState(false);
 
     const currentQuestion = survey.questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
@@ -61,8 +62,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
         }
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
+    const handleSubmit = async () => {
 
         if (!validateCurrentAnswer()) return;
 
@@ -70,15 +70,16 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
         setError(null);
 
         try {
-            // Вызываем Server Action напрямую вместо fetch
+            for (const question of survey.questions) {
+                if (!answers[question.id]) {
+                    answers[question.id] = null;
+                }
+            }
             const result = await submitSurvey(survey.id, answers);
 
-            // Проверяем результат, который вернул action
             if (result.success) {
                 console.log('Опрос успешно пройден! ID ответа:', result.userResponseId);
-                router.push('/'); // Редирект на главную
             } else {
-                // Если action вернул ошибку, показываем ее
                 throw new Error(result.error || 'Произошла неизвестная ошибка.');
             }
 
@@ -87,6 +88,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
             setError(err.message);
         } finally {
             setIsSubmitting(false);
+            setIsFinished(true);
         }
     };
 
@@ -94,7 +96,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
 
     return (
         <div className="max-w-3xl mx-auto">
-            <form onSubmit={handleSubmit}>
+            <div>
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-2xl">{survey.title}</CardTitle>
@@ -121,6 +123,12 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
                             </Alert>
                         )}
 
+                        {isFinished && (
+                            <Alert variant="success">
+                                <AlertDescription>Вы успешно завершили опрос</AlertDescription>
+                            </Alert>
+                        )}
+
                         <div className="flex justify-between items-center pt-4 border-t">
                             <Button type="button" variant="outline" onClick={handlePrevious} disabled={currentQuestionIndex === 0 || isSubmitting}>
                                 Назад
@@ -131,14 +139,14 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
                                     Далее
                                 </Button>
                             ) : (
-                                <Button type="submit" disabled={isSubmitting} size="lg">
+                                <Button type="button" onClick={handleSubmit} disabled={isSubmitting} size="lg">
                                     {isSubmitting ? 'Отправка...' : 'Завершить опрос'}
                                 </Button>
                             )}
                         </div>
                     </CardContent>
                 </Card>
-            </form>
+            </div>
         </div>
     );
 }
