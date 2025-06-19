@@ -25,7 +25,7 @@ export function TabsNav({ surveyId }: TabsNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              "shrink-0 border-b-2 px-3 py-2 text-base font-medium",
+              "shrink-0 border-b-2 px-3 py-2 text-lg font-medium",
               pathname === item.href
                 ? "border-sky-500 text-sky-600"
                 : "border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700",
