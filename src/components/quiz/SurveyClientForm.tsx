@@ -9,6 +9,7 @@ import { ProgressBar } from './ProgressBar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {submitSurvey} from "@/app/survey/actions";
 
 export type FullSurvey = Survey & {
     questions: (Question & {
@@ -69,28 +70,21 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
         setError(null);
 
         try {
-            const response = await fetch('/survey/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    surveyId: survey.id,
-                    answers: answers,
-                }),
-            });
+            // Вызываем Server Action напрямую вместо fetch
+            const result = await submitSurvey(survey.id, answers);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Произошла ошибка при отправке данных.');
+            // Проверяем результат, который вернул action
+            if (result.success) {
+                console.log('Опрос успешно пройден! ID ответа:', result.userResponseId);
+                router.push('/'); // Редирект на главную
+            } else {
+                // Если action вернул ошибку, показываем ее
+                throw new Error(result.error || 'Произошла неизвестная ошибка.');
             }
-
-            console.log('Опрос успешно пройден!');
-            router.push('/');
 
         } catch (err: any) {
             console.error('Ошибка при отправке опроса:', err);
-            setError(err.message || 'Произошла непредвиденная ошибка. Попробуйте снова.');
+            setError(err.message);
         } finally {
             setIsSubmitting(false);
         }

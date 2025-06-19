@@ -1,21 +1,23 @@
-import { NextResponse } from 'next/server';
-import {prisma} from '@/lib/prisma';
-import { QuestionType } from '@/generated/prisma';
+'use server';
 
-interface SubmitRequestBody {
-    surveyId: number;
-    answers: Record<string, any>;
+import { prisma } from '@/lib/prisma';
+import { QuestionType } from '@/generated/prisma';
+import { revalidatePath } from 'next/cache';
+
+interface ActionResult {
+    success: boolean;
+    error?: string;
+    userResponseId?: number;
 }
 
-export async function POST(req: Request) {
+type Answers = Record<string, any>;
+
+export async function submitSurvey(surveyId: number, answers: Answers): Promise<ActionResult> {
+    if (!surveyId || !answers || Object.keys(answers).length === 0) {
+        return { success: false, error: 'Отсутствуют необходимые данные' };
+    }
+
     try {
-        const body: SubmitRequestBody = await req.json();
-        const { surveyId, answers } = body;
-
-        if (!surveyId || !answers || Object.keys(answers).length === 0) {
-            return NextResponse.json({ error: 'Отсутствуют необходимые данные' }, { status: 400 });
-        }
-
         const questions = await prisma.question.findMany({
             where: { surveyId: surveyId },
             select: { id: true, type: true },
@@ -36,6 +38,10 @@ export async function POST(req: Request) {
 
                 if (!questionType) {
                     console.warn(`Вопрос с ID ${questionId} не найден в опросе. Пропускаем.`);
+                    return;
+                }
+
+                if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
                     return;
                 }
 
@@ -71,10 +77,12 @@ export async function POST(req: Request) {
             return { userResponseId: userResponse.id };
         });
 
-        return NextResponse.json(result, { status: 201 });
+        revalidatePath('/');
+
+        return { success: true, userResponseId: result.userResponseId };
 
     } catch (error) {
-        console.error("Ошибка при отправке ответов:", error);
-        return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 });
+        console.error("Ошибка при отправке ответов (Server Action):", error);
+        return { success: false, error: 'Внутренняя ошибка сервера. Пожалуйста, попробуйте еще раз.' };
     }
 }
