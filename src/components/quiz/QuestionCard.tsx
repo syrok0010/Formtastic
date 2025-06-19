@@ -2,49 +2,54 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnswerOptions } from './AnswerOptions';
 
-interface Question {
-  id: string;
-  type: 'single_choice' | 'multiple_choice' | 'text' | 'rating' | 'boolean';
+interface QuestionCardProps {
+  questionId: string;
   title: string;
   description?: string;
   required: boolean;
+  type: 'single_choice' | 'multiple_choice' | 'text' | 'rating' | 'boolean' | 'NUMBER';
   options?: { id: string; text: string; }[];
   maxRating?: number;
-}
-
-interface QuestionCardProps {
-  question: Question;
   answer: any;
   onAnswerChange: (answer: any) => void;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
-  question,
-  answer,
-  onAnswerChange,
-}) => {
+                                                            questionId,
+                                                            title,
+                                                            description,
+                                                            required,
+                                                            type,
+                                                            options,
+                                                            maxRating,
+                                                            answer,
+                                                            onAnswerChange,
+                                                          }) => {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-start gap-2">
-          <span>{question.title}</span>
-          {question.required && (
-            <span className="text-red-500 text-sm">*</span>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-start gap-2">
+            <span>{title}</span>
+            {required && (
+                <span className="text-red-500 text-sm">*</span>
+            )}
+          </CardTitle>
+          {description && (
+              <p className="text-sm text-muted-foreground">
+                {description}
+              </p>
           )}
-        </CardTitle>
-        {question.description && (
-          <p className="text-sm text-muted-foreground">
-            {question.description}
-          </p>
-        )}
-      </CardHeader>
-      <CardContent>
-        <AnswerOptions
-          question={question}
-          value={answer}
-          onChange={onAnswerChange}
-        />
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <AnswerOptions
+              questionId={questionId}
+              type={type}
+              options={options}
+              maxRating={maxRating}
+              value={answer}
+              onChange={onAnswerChange}
+          />
+        </CardContent>
+      </Card>
   );
 };
