@@ -14,6 +14,7 @@ import { ClipboardList, Users } from "lucide-react";
 import { UserRole } from "@/generated/prisma";
 import { signInWithRole } from "@/actions/auth.actions";
 import { useSearchParams } from "next/navigation";
+import { useViewTransition } from "@/hooks/use-view-transition";
 
 const roles = [
   {
@@ -36,6 +37,7 @@ export default function LoginForm() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const { startTransition } = useViewTransition();
   const error = searchParams.get("error");
 
   const handleSignIn = async () => {
@@ -45,14 +47,7 @@ export default function LoginForm() {
   };
 
   const handleRoleSelect = (roleType: UserRole) => {
-    if (!document.startViewTransition) {
-      setSelectedRole(roleType);
-      return;
-    }
-
-    document.startViewTransition(() => {
-      setSelectedRole(roleType);
-    });
+    startTransition(() => setSelectedRole(roleType));
   };
 
   return (
