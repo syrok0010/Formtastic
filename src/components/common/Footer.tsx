@@ -5,8 +5,8 @@ import {Github} from "lucide-react";
 export default function Footer() {
   return (
     <footer className="w-full border-t bg-background py-8 text-foreground">
-      <div className="container mx-auto px-4 lg:px-8 flex justify-between items-center">
-        <div className="flex gap-6">
+      <div className="container mx-auto px-4 lg:px-8 flex flex-col gap-y-6 md:flex-row justify-between items-center">
+        <div className="flex gap-6 flex-col md:flex-row items-center">
           <Link href="/" className="flex items-center space-x-2 cursor-pointer">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <svg
@@ -25,7 +25,7 @@ export default function Footer() {
             </div>
             <span className="text-xl font-bold text-gray-900">Formtastic</span>
           </Link>
-          <div className="flex flex-col justify-center gap-2 max-w-md pl-6 text-wrap border-l-2 border-gray-200">
+          <div className="flex flex-col justify-center gap-2 text-center md:text-left max-w-md md:pl-6 text-wrap md:border-l-2 border-gray-200">
             <p className="text-lg">
               Платформа для создания и проведения опросов и викторин.
             </p>
@@ -34,9 +34,9 @@ export default function Footer() {
             </p>
           </div>
         </div>
-        <Github className="h-8 w-8 text-muted-foreground cursor-pointer">
-          <Link href="https://github.com/syrok0010/Formtastic"></Link>
-        </Github>
+          <Link href="https://github.com/syrok0010/Formtastic">
+            <Github className="h-8 w-8 text-muted-foreground cursor-pointer"/>
+          </Link>
       </div>
     </footer>
   );
