@@ -44,20 +44,32 @@ export default function LoginForm() {
     await signInWithRole(selectedRole);
   };
 
+  const handleRoleSelect = (roleType: UserRole) => {
+    if (!document.startViewTransition) {
+      setSelectedRole(roleType);
+      return;
+    }
+
+    document.startViewTransition(() => {
+      setSelectedRole(roleType);
+    });
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40 p-4">
-      <div className="text-center mb-8">
+    <div className="grow flex flex-col items-center justify-center bg-muted/40 gap-8 p-4">
+      <div className="text-center" style={{ viewTransitionName: `role-title` }}>
         <h1 className="text-3xl font-bold">Добро пожаловать!</h1>
         <p className="text-muted-foreground mt-2">
           Для начала, пожалуйста, выберите вашу роль.
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row gap-6">
         {roles.map((role) => (
           <Card
             key={role.type}
-            onClick={() => setSelectedRole(role.type)}
+            onClick={() => handleRoleSelect(role.type)}
+            style={{ viewTransitionName: `role-card-${role.type}` }}
             className={cn(
               "w-72 cursor-pointer transition-all hover:shadow-lg",
               selectedRole === role.type
@@ -90,8 +102,8 @@ export default function LoginForm() {
         </div>
       )}
 
-      <div className="h-10">
-        {selectedRole && (
+      {selectedRole && (
+        <div className="h-10">
           <Button
             onClick={handleSignIn}
             disabled={isLoading}
@@ -102,8 +114,8 @@ export default function LoginForm() {
               ? "Перенаправление..."
               : `Войти с Google как ${selectedRole === "SURVEY_CREATOR" ? "Создатель" : "Респондент"}`}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

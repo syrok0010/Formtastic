@@ -30,7 +30,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-dvh flex flex-col bg-gray-50`}
       >
         <Header />
-        <main className="grow container mx-auto py-8 px-4">{children}</main>
+        <main className="grow container mx-auto py-8 px-4 flex flex-col">{children}</main>
         <Footer />
       </body>
     </html>
