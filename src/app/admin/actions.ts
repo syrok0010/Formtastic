@@ -8,11 +8,6 @@ import { QuestionType, SurveyStatus, UserRole } from "@/generated/prisma";
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma";
 
-const OptionSchema = z.object({
-  text: z.string().min(1, "Текст варианта не может быть пустым"),
-  order: z.number().int(),
-});
-
 const mySurveysSelect = {
   id: true,
   title: true,
@@ -35,7 +30,14 @@ export type MySurveysApiResponse = MySurveyListItemPayload[];
 
 export type MySurveyListItem = MySurveyListItemPayload;
 
+const OptionSchema = z.object({
+  id: z.number().int().optional(),
+  text: z.string().min(1, "Текст варианта не может быть пустым"),
+  order: z.number().int(),
+});
+
 const QuestionSchema = z.object({
+  id: z.number().int().optional(),
   text: z.string().min(1, "Текст вопроса не может быть пустым"),
   type: z.nativeEnum(QuestionType),
   isRequired: z.boolean(),
@@ -59,26 +61,19 @@ type FormState = {
 };
 
 export async function updateSurveyAction(
-  prevState: FormState,
-  formData: FormData,
+    prevState: FormState,
+    formData: FormData,
 ): Promise<FormState> {
   const session = await auth();
 
   if (!session?.user?.id || session.user.role !== UserRole.SURVEY_CREATOR) {
-    // В Server Action мы не можем напрямую редиректить в середине выполнения,
-    // но можем вернуть ошибку. Редирект лучше делать на клиенте, если нужно.
-    // Либо, если это критическая ошибка, можно вызвать `redirect()`.
-    redirect("/api/auth/signin"); // Например, на страницу входа
+    redirect("/api/auth/signin");
   }
 
   const rawData = JSON.parse(formData.get("surveyData") as string);
   const validationResult = SurveyUpdateSchema.safeParse(rawData);
 
   if (!validationResult.success) {
-    console.error(
-      "Validation failed:",
-      validationResult.error.flatten().fieldErrors,
-    );
     return {
       success: false,
       message: "Ошибка валидации. Проверьте введенные данные.",
@@ -88,24 +83,29 @@ export async function updateSurveyAction(
 
   const surveyData = validationResult.data;
   const surveyId = surveyData.id;
+  const userId = session.user.id;
 
   try {
-    const existingSurvey = await prisma.survey.findUnique({
-      where: { id: surveyId },
-      select: { creatorId: true },
-    });
-
-    if (!existingSurvey) {
-      return { success: false, message: "Опрос не найден." };
-    }
-    if (existingSurvey.creatorId !== session.user.id) {
-      return {
-        success: false,
-        message: "У вас нет прав на редактирование этого опроса.",
-      };
-    }
-
     await prisma.$transaction(async (tx) => {
+      const existingSurvey = await tx.survey.findUnique({
+        where: { id: surveyId },
+        include: {
+          questions: {
+            include: {
+              options: true,
+              _count: { select: { answers: true } },
+            },
+          },
+        },
+      });
+
+      if (!existingSurvey) {
+        throw new Error("Опрос не найден.");
+      }
+      if (existingSurvey.creatorId !== userId) {
+        throw new Error("У вас нет прав на редактирование этого опроса.");
+      }
+
       await tx.survey.update({
         where: { id: surveyId },
         data: {
@@ -116,19 +116,87 @@ export async function updateSurveyAction(
         },
       });
 
-      await tx.question.deleteMany({ where: { surveyId: surveyId } });
+      const existingQuestions = existingSurvey.questions;
+      const submittedQuestions = surveyData.questions;
 
-      if (surveyData.questions && surveyData.questions.length > 0) {
-        for (const q of surveyData.questions) {
+      const submittedQuestionIds = submittedQuestions
+          .map((q) => q.id)
+          .filter((id): id is number => id !== undefined);
+
+      const questionsToDelete = existingQuestions.filter(
+          (q) => !submittedQuestionIds.includes(q.id),
+      );
+
+      for (const q of questionsToDelete) {
+        if (q._count.answers > 0) {
+          throw new Error(
+              `Нельзя удалить вопрос "${q.text}", так как на него уже есть ответы.`,
+          );
+        }
+        await tx.question.delete({ where: { id: q.id } });
+      }
+
+      for (const submittedQ of submittedQuestions) {
+        const questionInDb = existingQuestions.find((q) => q.id === submittedQ.id);
+
+        if (submittedQ.id && questionInDb) {
+          await tx.question.update({
+            where: { id: submittedQ.id },
+            data: {
+              text: submittedQ.text,
+              type: submittedQ.type,
+              isRequired: submittedQ.isRequired,
+              order: submittedQ.order,
+            },
+          });
+
+          const existingOptions = questionInDb.options;
+          const submittedOptions = submittedQ.options;
+          const submittedOptionIds = submittedOptions
+              .map((opt) => opt.id)
+              .filter((id): id is number => id !== undefined);
+
+          const optionsToDelete = existingOptions.filter(
+              (opt) => !submittedOptionIds.includes(opt.id),
+          );
+
+          if (optionsToDelete.length > 0) {
+            if (questionInDb._count.answers > 0) {
+              throw new Error(
+                  `Нельзя удалять варианты у вопроса "${submittedQ.text}", так как на него уже есть ответы. Это может повредить данные.`,
+              );
+            }
+            await tx.answerOption.deleteMany({
+              where: { id: { in: optionsToDelete.map((opt) => opt.id) } },
+            });
+          }
+
+          for (const opt of submittedOptions) {
+            if (opt.id) {
+              await tx.answerOption.update({
+                where: { id: opt.id },
+                data: { text: opt.text, order: opt.order },
+              });
+            } else {
+              await tx.answerOption.create({
+                data: {
+                  questionId: submittedQ.id,
+                  text: opt.text,
+                  order: opt.order,
+                },
+              });
+            }
+          }
+        } else {
           await tx.question.create({
             data: {
               surveyId: surveyId,
-              text: q.text,
-              type: q.type,
-              isRequired: q.isRequired,
-              order: q.order,
+              text: submittedQ.text,
+              type: submittedQ.type,
+              isRequired: submittedQ.isRequired,
+              order: submittedQ.order,
               options: {
-                create: q.options.map((opt) => ({
+                create: submittedQ.options.map((opt) => ({
                   text: opt.text,
                   order: opt.order,
                 })),
@@ -143,11 +211,16 @@ export async function updateSurveyAction(
     revalidatePath(`/admin/${surveyId}/results`);
 
     return { success: true, message: "Опрос успешно сохранен!" };
+
   } catch (error) {
     console.error("Failed to update survey:", error);
+    const errorMessage =
+        error instanceof Error
+            ? error.message
+            : "Внутренняя ошибка сервера. Не удалось сохранить опрос.";
     return {
       success: false,
-      message: "Внутренняя ошибка сервера. Не удалось сохранить опрос.",
+      message: errorMessage,
     };
   }
 }
