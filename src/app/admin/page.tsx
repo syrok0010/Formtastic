@@ -23,13 +23,14 @@ import {
   MoreHorizontal,
   BarChart,
   Pencil,
-  Trash2,
   FileText,
   Users,
-  ListPlus,
+  ListPlus, Inbox,
 } from "lucide-react";
 import { createSurveyAction, getSurveysByCreatorId } from "@/app/admin/actions";
 import { ExpandableButton } from "@/components/ui/expandable-button";
+import React from "react";
+import {DeleteSurveyMenuItem} from "@/app/admin/delete-survey-menu-item";
 
 const SurveyStatusBadge = ({ status }: { status: SurveyStatus }) => {
   switch (status) {
@@ -100,10 +101,16 @@ export default async function AllSurveys() {
                           Редактировать
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Удалить
-                      </DropdownMenuItem>
+                      <DeleteSurveyMenuItem surveyId={survey.id} status={survey.status} />
+                      {/*<DropdownMenuItem disabled={survey.status !== SurveyStatus.DRAFT} className="!pointer-events-none text-red-600 focus:text-red-600 focus:bg-red-50">*/}
+                      {/*  <form*/}
+                      {/*      action={async () => {"use server"; await deleteSurveyAction(survey.id);}}*/}
+                      {/*      className="flex gap-2 items-center pointer-events-auto"*/}
+                      {/*  >*/}
+                      {/*    <Trash2 className="mr-2 h-4 w-4" />*/}
+                      {/*    <button>Удалить</button>*/}
+                      {/*  </form>*/}
+                      {/*</DropdownMenuItem>*/}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>
@@ -132,17 +139,13 @@ export default async function AllSurveys() {
           ))}
         </div>
       ) : (
-        // Состояние, когда опросов еще нет, остается таким же
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-10">
-              <h3 className="text-xl font-semibold">Опросов пока нет</h3>
-              <p className="text-muted-foreground mt-2">
-                Нажмите на кнопку "Создать опрос", чтобы начать.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-12 text-center col-span-2">
+          <Inbox className="h-12 w-12 text-muted-foreground" />
+          <h2 className="mt-4 text-xl font-semibold">Опросов пока нет</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Как только вы добавите новый опрос, он появятся здесь.
+          </p>
+        </div>
       )}
     </>
   );

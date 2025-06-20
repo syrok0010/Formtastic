@@ -37,7 +37,7 @@ export default async function Header() {
               <nav className="hidden md:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
                 <Link
                   href={surveysUrl}
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 text-base font-medium transition-colors"
+                  className="text-gray-600 hover:text-blue-600 px-3 py-2 text-base font-medium transition-colors duration-300"
                 >
                   {navWord}
                 </Link>

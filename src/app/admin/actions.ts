@@ -273,3 +273,57 @@ export async function getSurveysByCreatorId(
     throw new Error("Failed to fetch surveys.");
   }
 }
+
+export async function deleteSurveyAction(surveyId: number) {
+  const session = await auth();
+
+  if (!session?.user?.id || session.user.role !== UserRole.SURVEY_CREATOR) {
+    return {
+      success: false,
+      message: "У вас нет прав для выполнения этого действия.",
+    };
+  }
+  const userId = session.user.id;
+
+  try {
+    const survey = await prisma.survey.findUnique({
+      where: {
+        id: surveyId,
+      },
+    });
+
+    if (!survey) {
+      return { success: false, message: "Опрос не найден." };
+    }
+
+    if (survey.creatorId !== userId) {
+      return {
+        success: false,
+        message: "Вы не можете удалить чужой опрос.",
+      };
+    }
+
+    if (survey.status !== SurveyStatus.DRAFT) {
+      return {
+        success: false,
+        message: "Удалить можно только опросы со статусом 'Черновик'.",
+      };
+    }
+
+    await prisma.survey.delete({
+      where: {
+        id: surveyId,
+      },
+    });
+
+  } catch (error) {
+    console.error("Failed to delete survey:", error);
+    return {
+      success: false,
+      message: "Произошла ошибка при удалении опроса.",
+    };
+  }
+
+  revalidatePath("/admin");
+  redirect("/admin");
+}

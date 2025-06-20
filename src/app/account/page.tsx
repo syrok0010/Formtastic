@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {Inbox} from "lucide-react";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -44,9 +45,6 @@ export default async function AccountPage() {
         <h1 className="text-3xl font-bold tracking-tight">
           Мои пройденные опросы
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Здесь отображаются все опросы, в которых вы приняли участие.
-        </p>
       </div>
 
       {userResponses.length > 0 ? (
@@ -70,9 +68,10 @@ export default async function AccountPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/50 py-20 text-center">
-          <h2 className="text-xl font-semibold">Опросов пока нет</h2>
-          <p className="text-muted-foreground mt-2 max-w-xs">
+        <div className="flex flex-col items-center justify-center py-12 text-center col-span-2">
+          <Inbox className="h-12 w-12 text-muted-foreground" />
+          <h2 className="mt-4 text-xl font-semibold">Опросов пока нет</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             Как только вы пройдете свой первый опрос, он появится здесь.
           </p>
         </div>
