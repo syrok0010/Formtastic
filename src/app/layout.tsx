@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { auth, signOut } from "@/auth";
-import { Button } from "@/components/ui/button";
+import Footer from "@/components/common/Footer";
+import Header from "@/components/common/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,24 +24,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-dvh flex flex-col bg-gray-50`}
       >
-        {!!session && (
-          <form
-            className="absolute top-8 right-8"
-            action={async () => {
-              "use server";
-              await signOut();
-            }}
-          >
-            <Button type="submit">Выйти</Button>
-          </form>
-        )}
-        {children}
+        <Header />
+        <main className="grow container mx-auto py-8 px-4">{children}</main>
+        <Footer />
       </body>
     </html>
   );

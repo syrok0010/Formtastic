@@ -1,5 +1,7 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
+import { auth, signOut } from "@/auth";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   title?: string;
@@ -7,11 +9,13 @@ interface HeaderProps {
   className?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  title = 'Formtastic',
+export default async function Header({
+  title = "Formtastic",
   showNavigation = true,
-  className = '',
-}) => {
+  className = "",
+}: HeaderProps) {
+  const session = await auth();
+
   return (
     <header className={`bg-white shadow-sm border-b ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,17 +24,17 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg 
-                  className="w-5 h-5 text-white" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
               </div>
@@ -60,6 +64,17 @@ export const Header: React.FC<HeaderProps> = ({
                 Контакты
               </Link>
             </nav>
+          )}
+
+          {!!session && (
+            <form
+              action={async () => {
+                "use server";
+                await signOut();
+              }}
+            >
+              <Button type="submit">Выйти</Button>
+            </form>
           )}
 
           {/* Мобильное меню */}
@@ -92,4 +107,4 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
   );
-};
+}

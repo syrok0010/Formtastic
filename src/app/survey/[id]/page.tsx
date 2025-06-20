@@ -1,14 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
-import { Header } from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
 import { SurveyClientForm } from "@/components/quiz/SurveyClientForm";
 import { auth } from "@/auth";
 
 export default async function SurveyPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const surveyId = parseInt(id, 10);
@@ -43,13 +41,5 @@ export default async function SurveyPage({
     redirect("/");
   }
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
-      <main className="flex-grow container mx-auto py-8 px-4">
-        <SurveyClientForm survey={survey} />
-      </main>
-      <Footer />
-    </div>
-  );
+  return <SurveyClientForm survey={survey} />;
 }

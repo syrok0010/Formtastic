@@ -32,7 +32,7 @@ export default async function SurveyAdminLayout({
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-5xl space-y-6 @5xl:px-0 px-8">
+    <div className="container mx-auto max-w-5xl space-y-6 @5xl:px-0 px-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">{survey.title}</h1>
       </div>

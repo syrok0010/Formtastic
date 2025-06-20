@@ -55,7 +55,7 @@ export default async function AllSurveys() {
   const surveys = await getSurveysByCreatorId(session.user.id);
 
   return (
-    <div className="container mx-auto p-10">
+    <div className="container mx-auto px-10">
       <header className="flex flex-wrap gap-4 items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Мои опросы</h1>
         <ExpandableButton
