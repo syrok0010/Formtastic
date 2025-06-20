@@ -54,8 +54,12 @@ interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
 }
 
-type QuestionWithTempId = SurveyDetailPayload['questions'][0] & { tempId?: string };
-type OptionWithTempId = SurveyDetailPayload['questions'][0]['options'][0] & { tempId?: string };
+type QuestionWithTempId = SurveyDetailPayload["questions"][0] & {
+  tempId?: string;
+};
+type OptionWithTempId = SurveyDetailPayload["questions"][0]["options"][0] & {
+  tempId?: string;
+};
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -185,7 +189,7 @@ export function SurveyDetailsClient({
   };
 
   return (
-    <form action={formAction} className="container max-w-5xl space-y-8">
+    <form action={formAction} className="max-w-5xl space-y-8 mx-auto">
       <input type="hidden" name="surveyData" value={JSON.stringify(survey)} />
 
       <div className="flex justify-between items-center flex-wrap gap-4">
@@ -276,11 +280,16 @@ export function SurveyDetailsClient({
           modifiers={[restrictToVerticalAxis]}
         >
           <SortableContext
-            items={survey.questions.map((q) => q.id ?? (q as QuestionWithTempId).tempId)}
+            items={survey.questions.map(
+              (q) => q.id ?? (q as QuestionWithTempId).tempId,
+            )}
             strategy={verticalListSortingStrategy}
           >
             {survey.questions.map((question, qIndex) => (
-              <SortableQuestionItem key={question.id ?? (question as QuestionWithTempId).tempId} id={question.id ?? (question as QuestionWithTempId).tempId}>
+              <SortableQuestionItem
+                key={question.id ?? (question as QuestionWithTempId).tempId}
+                id={question.id ?? (question as QuestionWithTempId).tempId}
+              >
                 <Card key={question.id}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Вопрос {qIndex + 1}</CardTitle>
@@ -355,7 +364,9 @@ export function SurveyDetailsClient({
                         <h4 className="text-sm font-medium">Варианты ответа</h4>
                         {question.options.map((option, optIndex) => (
                           <div
-                            key={option.id ?? (option as OptionWithTempId).tempId}
+                            key={
+                              option.id ?? (option as OptionWithTempId).tempId
+                            }
                             className="flex items-center gap-2"
                           >
                             <Input

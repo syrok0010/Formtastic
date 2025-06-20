@@ -123,9 +123,9 @@ export default async function AllSurveys() {
 
                 <CardFooter className="flex justify-between items-center pt-4">
                   <SurveyStatusBadge status={survey.status} />
-                  <div className="text-xs text-muted-foreground">
+                  <Badge variant="secondary">
                     {new Date(survey.createdAt).toLocaleDateString("ru-RU")}
-                  </div>
+                  </Badge>
                 </CardFooter>
               </Card>
             </Link>

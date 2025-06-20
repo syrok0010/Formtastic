@@ -32,7 +32,7 @@ export default async function SurveyAdminLayout({
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">{survey.title}</h1>
       <TabsNav surveyId={survey.id} />
       <main>{children}</main>
