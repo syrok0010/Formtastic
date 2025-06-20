@@ -72,9 +72,7 @@ export default async function AllSurveys() {
             <Link key={survey.id} href={"/admin/" + survey.id + "/edit"}>
               <Card className="flex flex-col h-full cursor-pointer transition-all hover:shadow-lg">
                 <CardHeader className="flex flex-row items-start justify-between pb-4">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{survey.title}</CardTitle>
-                  </div>
+                  <CardTitle className="text-lg">{survey.title}</CardTitle>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -110,7 +108,7 @@ export default async function AllSurveys() {
                   </DropdownMenu>
                 </CardHeader>
 
-                <CardContent className="flex-grow space-y-4">
+                <CardContent className="grow space-y-4">
                   <div className="flex justify-around text-base text-muted-foreground">
                     <div className="flex items-center">
                       <FileText className="mr-1.5 h-4 w-4" />
@@ -125,9 +123,9 @@ export default async function AllSurveys() {
 
                 <CardFooter className="flex justify-between items-center pt-4">
                   <SurveyStatusBadge status={survey.status} />
-                  <div className="text-xs text-muted-foreground">
+                  <Badge variant="secondary">
                     {new Date(survey.createdAt).toLocaleDateString("ru-RU")}
-                  </div>
+                  </Badge>
                 </CardFooter>
               </Card>
             </Link>

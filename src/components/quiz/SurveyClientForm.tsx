@@ -7,7 +7,7 @@ import { QuestionCard } from "./QuestionCard";
 import { ProgressBar } from "./ProgressBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { submitSurvey } from "@/app/survey/actions";
 
 export type FullSurvey = Survey & {
@@ -105,11 +105,13 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
           percentage={progressPercentage}
         />
 
-        <QuestionCard
-          question={currentQuestion}
-          answer={answers[currentQuestion.id]}
-          onAnswerChange={handleAnswerChange}
-        />
+        {!isFinished && (
+          <QuestionCard
+            question={currentQuestion}
+            answer={answers[currentQuestion.id]}
+            onAnswerChange={handleAnswerChange}
+          />
+        )}
 
         {error && (
           <Alert variant="destructive">
@@ -124,36 +126,41 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
         )}
 
         {isFinished && (
-          <Alert>
-            <AlertDescription>Вы успешно завершили опрос</AlertDescription>
+          <Alert variant="positive">
+            <AlertTitle>Опрос завершен</AlertTitle>
+            <AlertDescription>
+              Ваш ответ на вопрос успешно сохранен
+            </AlertDescription>
           </Alert>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentQuestionIndex === 0 || isSubmitting}
-          >
-            Назад
-          </Button>
-
-          {!isLastQuestion ? (
-            <Button type="button" onClick={handleNext}>
-              Далее
-            </Button>
-          ) : (
+        {!isFinished && (
+          <div className="flex justify-between items-center pt-4 border-t">
             <Button
               type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              size="lg"
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentQuestionIndex === 0 || isSubmitting}
             >
-              {isSubmitting ? "Отправка..." : "Завершить опрос"}
+              Назад
             </Button>
-          )}
-        </div>
+
+            {!isLastQuestion ? (
+              <Button type="button" onClick={handleNext}>
+                Далее
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                size="lg"
+              >
+                {isSubmitting ? "Отправка..." : "Завершить опрос"}
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

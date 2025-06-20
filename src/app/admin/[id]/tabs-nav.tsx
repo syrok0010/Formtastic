@@ -14,6 +14,7 @@ export function TabsNav({ surveyId }: TabsNavProps) {
 
   const navItems = [
     { href: `${basePath}/edit`, label: "Редактор" },
+    { href: `${basePath}/answers`, label: "Ответы" },
     { href: `${basePath}/results`, label: "Результаты" },
   ];
 
