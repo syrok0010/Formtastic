@@ -1,9 +1,9 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Footer() {
   return (
     <footer className="w-full border-t bg-background py-8 text-foreground">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between gap-8 md:gap-16 px-4">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between gap-8 md:gap-16 px-4 lg:px-8">
         <div>
           <h2 className="font-bold text-lg mb-2">Formtastic</h2>
           <p className="text-sm text-muted-foreground max-w-xs">
