@@ -48,6 +48,7 @@ import {
   localizedQuestionTypes,
   localizedSurveyStatuses,
 } from "@/lib/localization";
+import { useViewTransition } from "@/hooks/use-view-transition";
 
 interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
@@ -67,6 +68,7 @@ export function SurveyDetailsClient({
   initialSurvey,
 }: SurveyDetailsClientProps) {
   const [survey, setSurvey] = useState(initialSurvey);
+  const { startTransition } = useViewTransition();
 
   const initialState = { message: "", success: false, errors: undefined };
   const [formState, formAction] = useActionState(
@@ -136,19 +138,21 @@ export function SurveyDetailsClient({
   };
 
   const addQuestion = () => {
-    const newQuestion = {
-      id: -1 * (Date.now() + survey.questions.length),
-      text: "",
-      type: QuestionType.TEXT,
-      isRequired: true,
-      order: survey.questions.length,
-      options: [],
-    };
+    startTransition(() => {
+      const newQuestion = {
+        id: -1 * (Date.now() + survey.questions.length),
+        text: "",
+        type: QuestionType.TEXT,
+        isRequired: true,
+        order: survey.questions.length,
+        options: [],
+      };
 
-    setSurvey((prev) => ({
-      ...prev,
-      questions: [...prev.questions, newQuestion] as any,
-    }));
+      setSurvey((prev) => ({
+        ...prev,
+        questions: [...prev.questions, newQuestion] as any,
+      }));
+    });
   };
 
   const removeQuestion = (qIndex: number) => {
