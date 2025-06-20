@@ -114,7 +114,7 @@ async function presentQuestion(ctx: MyContext) {
   }
 
   await ctx.reply(
-    `❓ Вопрос ${currentQuestionIndex + 1}/${survey.questions.length}:\n\n*${question.text}*`,
+    `❓Вопрос ${currentQuestionIndex + 1}/${survey.questions.length}${!question.isRequired ? " (необязательный):" : ":"}\n\n*${question.text}*`,
     {
       parse_mode: "Markdown",
       reply_markup: keyboard,
