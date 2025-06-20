@@ -26,7 +26,7 @@ import {
   Trash2,
   FileText,
   Users,
-  ListPlus,
+  ListPlus, Inbox,
 } from "lucide-react";
 import { createSurveyAction, getSurveysByCreatorId } from "@/app/admin/actions";
 import { ExpandableButton } from "@/components/ui/expandable-button";
@@ -132,17 +132,13 @@ export default async function AllSurveys() {
           ))}
         </div>
       ) : (
-        // Состояние, когда опросов еще нет, остается таким же
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-10">
-              <h3 className="text-xl font-semibold">Опросов пока нет</h3>
-              <p className="text-muted-foreground mt-2">
-                Нажмите на кнопку "Создать опрос", чтобы начать.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-12 text-center col-span-2">
+          <Inbox className="h-12 w-12 text-muted-foreground" />
+          <h2 className="mt-4 text-xl font-semibold">Опросов пока нет</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Как только вы добавите новый опрос, он появятся здесь.
+          </p>
+        </div>
       )}
     </>
   );
