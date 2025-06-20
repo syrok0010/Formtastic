@@ -23,13 +23,14 @@ import {
   MoreHorizontal,
   BarChart,
   Pencil,
-  Trash2,
   FileText,
   Users,
   ListPlus, Inbox,
 } from "lucide-react";
 import { createSurveyAction, getSurveysByCreatorId } from "@/app/admin/actions";
 import { ExpandableButton } from "@/components/ui/expandable-button";
+import React from "react";
+import {DeleteSurveyMenuItem} from "@/app/admin/delete-survey-menu-item";
 
 const SurveyStatusBadge = ({ status }: { status: SurveyStatus }) => {
   switch (status) {
@@ -100,10 +101,16 @@ export default async function AllSurveys() {
                           Редактировать
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Удалить
-                      </DropdownMenuItem>
+                      <DeleteSurveyMenuItem surveyId={survey.id} status={survey.status} />
+                      {/*<DropdownMenuItem disabled={survey.status !== SurveyStatus.DRAFT} className="!pointer-events-none text-red-600 focus:text-red-600 focus:bg-red-50">*/}
+                      {/*  <form*/}
+                      {/*      action={async () => {"use server"; await deleteSurveyAction(survey.id);}}*/}
+                      {/*      className="flex gap-2 items-center pointer-events-auto"*/}
+                      {/*  >*/}
+                      {/*    <Trash2 className="mr-2 h-4 w-4" />*/}
+                      {/*    <button>Удалить</button>*/}
+                      {/*  </form>*/}
+                      {/*</DropdownMenuItem>*/}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>
