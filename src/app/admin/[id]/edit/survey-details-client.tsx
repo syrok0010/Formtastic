@@ -220,26 +220,31 @@ export function SurveyDetailsClient({
               onChange={(e) => handleValueChange("description", e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="status">Статус</Label>
-              <Select
-                value={survey.status}
-                onValueChange={(value) => handleValueChange("status", value)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(SurveyStatus).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {localizedSurveyStatuses[s]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="status">Статус</Label>
+            <Select
+              value={survey.status}
+              onValueChange={(value) => handleValueChange("status", value)}
+            >
+              <SelectTrigger id="status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(SurveyStatus).map((s) => (
+                  <SelectItem
+                    disabled={
+                      survey.status !== SurveyStatus.DRAFT &&
+                      s == SurveyStatus.DRAFT
+                    }
+                    key={s}
+                    value={s}
+                  >
+                    {localizedSurveyStatuses[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-2 mt-2">
               <Checkbox
                 id="isPublic"
                 checked={survey.isPublic}
@@ -248,7 +253,7 @@ export function SurveyDetailsClient({
                 }
               />
               <Label htmlFor="isPublic" className="cursor-pointer">
-                Публичный опрос
+                Не требовать аутентификацию для прохождения опроса
               </Label>
             </div>
           </div>
