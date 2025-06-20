@@ -18,7 +18,7 @@ export default async function Header({
 
   return (
     <header className={`bg-white shadow-sm border-b ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Логотип и название */}
           <div className="flex items-center">

@@ -178,7 +178,7 @@ export function SurveyDetailsClient({
   };
 
   return (
-    <form action={formAction} className="container py-4 max-w-5xl space-y-8">
+    <form action={formAction} className="container max-w-5xl space-y-8">
       <input type="hidden" name="surveyData" value={JSON.stringify(survey)} />
 
       <div className="flex justify-between items-center flex-wrap gap-4">

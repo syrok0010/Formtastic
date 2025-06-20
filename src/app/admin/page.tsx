@@ -55,7 +55,7 @@ export default async function AllSurveys() {
   const surveys = await getSurveysByCreatorId(session.user.id);
 
   return (
-    <div className="container mx-auto px-10">
+    <>
       <header className="flex flex-wrap gap-4 items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Мои опросы</h1>
         <ExpandableButton
@@ -77,7 +77,12 @@ export default async function AllSurveys() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost" className="cursor-pointer">
+                      <Button
+                        aria-haspopup="true"
+                        size="icon"
+                        variant="ghost"
+                        className="cursor-pointer"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                         <span className="sr-only">Открыть меню</span>
                       </Button>
@@ -141,6 +146,6 @@ export default async function AllSurveys() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </>
   );
 }

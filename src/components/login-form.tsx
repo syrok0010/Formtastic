@@ -14,6 +14,7 @@ import { ClipboardList, Users } from "lucide-react";
 import { UserRole } from "@/generated/prisma";
 import { signInWithRole } from "@/actions/auth.actions";
 import { useSearchParams } from "next/navigation";
+import { useViewTransition } from "@/hooks/use-view-transition";
 
 const roles = [
   {
@@ -36,6 +37,7 @@ export default function LoginForm() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const { startTransition } = useViewTransition();
   const error = searchParams.get("error");
 
   const handleSignIn = async () => {
@@ -44,20 +46,25 @@ export default function LoginForm() {
     await signInWithRole(selectedRole);
   };
 
+  const handleRoleSelect = (roleType: UserRole) => {
+    startTransition(() => setSelectedRole(roleType));
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40 p-4">
-      <div className="text-center mb-8">
+    <div className="grow flex flex-col items-center justify-center bg-muted/40 gap-8 p-4">
+      <div className="text-center" style={{ viewTransitionName: `role-title` }}>
         <h1 className="text-3xl font-bold">Добро пожаловать!</h1>
         <p className="text-muted-foreground mt-2">
           Для начала, пожалуйста, выберите вашу роль.
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row gap-6">
         {roles.map((role) => (
           <Card
             key={role.type}
-            onClick={() => setSelectedRole(role.type)}
+            onClick={() => handleRoleSelect(role.type)}
+            style={{ viewTransitionName: `role-card-${role.type}` }}
             className={cn(
               "w-72 cursor-pointer transition-all hover:shadow-lg",
               selectedRole === role.type
@@ -90,8 +97,8 @@ export default function LoginForm() {
         </div>
       )}
 
-      <div className="h-10">
-        {selectedRole && (
+      {selectedRole && (
+        <div className="h-10">
           <Button
             onClick={handleSignIn}
             disabled={isLoading}
@@ -102,8 +109,8 @@ export default function LoginForm() {
               ? "Перенаправление..."
               : `Войти с Google как ${selectedRole === "SURVEY_CREATOR" ? "Создатель" : "Респондент"}`}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

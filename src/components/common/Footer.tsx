@@ -4,8 +4,8 @@ import {Github} from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t bg-background py-8 px-10 text-foreground">
-      <div className="flex justify-between items-center">
+    <footer className="w-full border-t bg-background py-8 text-foreground">
+      <div className="container mx-auto px-4 lg:px-8 flex justify-between items-center">
         <div className="flex gap-6">
           <Link href="/" className="flex items-center space-x-2 cursor-pointer">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
