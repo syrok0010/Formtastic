@@ -1,8 +1,10 @@
 import {prisma} from '@/lib/prisma';
-import { notFound } from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import { Header } from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { SurveyClientForm } from '@/components/quiz/SurveyClientForm';
+import {auth} from "@/auth";
+import {Button} from "@/components/ui/button";
 
 export default async function SurveyPage({ params }: { params: { id: string } }) {
     const { id } = await params;
@@ -30,6 +32,13 @@ export default async function SurveyPage({ params }: { params: { id: string } })
 
     if (!survey) {
         notFound();
+    }
+
+
+    const session = await auth();
+
+    if (!survey.isPublic && !session?.user) {
+        redirect('/');
     }
 
     return (

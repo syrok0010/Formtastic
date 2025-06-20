@@ -32,7 +32,7 @@ export async function submitSurvey(surveyId: number, answers: Answers): Promise<
             const userResponse = await tx.userResponse.create({
                 data: {
                     surveyId: surveyId,
-                    userId: session!.user.id
+                    userId: session?.user.id ?? null
                 },
             });
 
