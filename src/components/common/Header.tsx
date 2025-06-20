@@ -46,7 +46,7 @@ export default async function Header({
           {showNavigation && (
             <nav className="hidden md:flex items-center space-x-8">
               <Link
-                href="/surveys"
+                href="/admin"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
               >
                 Опросы

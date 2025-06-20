@@ -146,49 +146,47 @@ export default async function CompletedSurveyPage({
   const { survey } = userResponse;
 
   return (
-    <div className="bg-muted/40 min-h-screen py-12">
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="mb-6">
-          <Button asChild variant="outline">
-            <Link href="/account">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Назад к моим опросам
-            </Link>
-          </Button>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">{survey.title}</CardTitle>
-            {survey.description && (
-              <CardDescription className="text-base pt-2">
-                {survey.description}
-              </CardDescription>
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {survey.questions.map((question, index) => (
-                <div
-                  key={question.id}
-                  className="pt-6 border-t first:border-t-0 first:pt-0"
-                >
-                  <h3 className="font-semibold text-lg mb-2">
-                    <span className="text-muted-foreground">
-                      Вопрос {index + 1}:
-                    </span>{" "}
-                    {question.text}
-                  </h3>
-                  <AnswerDisplay
-                    question={question}
-                    answer={answersMap[question.id]}
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+    <>
+      <div className="mb-6">
+        <Button asChild variant="outline">
+          <Link href="/account">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Назад к моим опросам
+          </Link>
+        </Button>
       </div>
-    </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">{survey.title}</CardTitle>
+          {survey.description && (
+            <CardDescription className="text-base pt-2">
+              {survey.description}
+            </CardDescription>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            {survey.questions.map((question, index) => (
+              <div
+                key={question.id}
+                className="pt-6 border-t first:border-t-0 first:pt-0"
+              >
+                <h3 className="font-semibold text-lg mb-2">
+                  <span className="text-muted-foreground">
+                    Вопрос {index + 1}:
+                  </span>{" "}
+                  {question.text}
+                </h3>
+                <AnswerDisplay
+                  question={question}
+                  answer={answersMap[question.id]}
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 }
