@@ -25,12 +25,13 @@ import {
   Pencil,
   FileText,
   Users,
-  ListPlus, Inbox,
+  ListPlus,
+  Inbox,
 } from "lucide-react";
 import { createSurveyAction, getSurveysByCreatorId } from "@/app/admin/actions";
 import { ExpandableButton } from "@/components/ui/expandable-button";
 import React from "react";
-import {DeleteSurveyMenuItem} from "@/app/admin/delete-survey-menu-item";
+import { DeleteSurveyMenuItem } from "@/app/admin/delete-survey-menu-item";
 
 const SurveyStatusBadge = ({ status }: { status: SurveyStatus }) => {
   switch (status) {
