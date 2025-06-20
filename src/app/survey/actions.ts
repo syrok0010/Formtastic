@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { QuestionType } from '@/generated/prisma';
 import { revalidatePath } from 'next/cache';
+import {auth} from "@/auth";
 
 interface ActionResult {
     success: boolean;
@@ -25,10 +26,13 @@ export async function submitSurvey(surveyId: number, answers: Answers): Promise<
 
         const questionTypeMap = new Map(questions.map(q => [q.id, q.type]));
 
+        const session = await auth();
+
         const result = await prisma.$transaction(async (tx) => {
             const userResponse = await tx.userResponse.create({
                 data: {
                     surveyId: surveyId,
+                    userId: session!.user.id
                 },
             });
 
