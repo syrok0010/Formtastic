@@ -1,6 +1,6 @@
 import { Bot, Context, session, InlineKeyboard } from "grammy";
 import { prisma } from "../src/lib/prisma";
-import { Question, AnswerOption } from "../src/generated/prisma";
+import { Question, AnswerOption, Survey } from "../src/generated/prisma";
 import { config } from "dotenv";
 
 config();
@@ -28,17 +28,18 @@ if (!process.env.BOT_TOKEN) {
 const bot = new Bot<MyContext>(process.env.BOT_TOKEN);
 
 bot.use(
-  session({
-    initial: (): SessionData => ({
-      answers: [],
+    session({
+      initial: (): SessionData => ({
+        answers: [],
+      }),
     }),
-  }),
 );
 
 bot.command("start", (ctx) => {
   ctx.reply(
-    "👋 Добро пожаловать! Я бот для прохождения опросов.\n\n" +
-      "Чтобы посмотреть список доступных опросов, используйте команду /surveys.",
+      "👋 Добро пожаловать! Я бот для прохождения опросов.\n\n" +
+      "Чтобы посмотреть список доступных опросов, используйте команду /surveys.\n" +
+      "Чтобы начать конкретный опрос, используйте /start_survey {ID опроса}."
   );
 });
 
@@ -70,11 +71,55 @@ bot.command("surveys", async (ctx) => {
   }
 });
 
+bot.command("start_survey", async (ctx) => {
+  const parts = ctx.message!.text.split(' ');
+  if (parts.length < 2) {
+    await ctx.reply("Пожалуйста, укажите ID опроса. Например: /start_survey 123");
+    return;
+  }
+
+  const surveyId = parseInt(parts[1], 10);
+  if (isNaN(surveyId)) {
+    await ctx.reply("ID опроса должен быть числом. Например: /start_survey 123");
+    return;
+  }
+
+  try {
+    const survey = await prisma.survey.findFirst({
+      where: {
+        id: surveyId,
+        isPublic: true,
+        status: 'PUBLISHED'
+      }
+    });
+
+    if (!survey) {
+      await ctx.reply("Опрос с таким ID не найден, или он недоступен для прохождения.");
+      return;
+    }
+
+    await startSurveyFlow(ctx, survey.id);
+
+  } catch (error) {
+    console.error("Failed to start survey by ID:", error);
+    await ctx.reply("Произошла ошибка при запуске опроса.");
+  }
+});
+
+async function startSurveyFlow(ctx: MyContext, surveyId: number) {
+  ctx.session.currentSurveyId = surveyId;
+  ctx.session.currentQuestionIndex = 0;
+  ctx.session.answers = [];
+  ctx.session.tempMultipleChoice = [];
+
+  await ctx.reply("Отлично! Начинаем опрос...");
+  await presentQuestion(ctx);
+}
+
 async function presentQuestion(ctx: MyContext) {
   const { currentSurveyId, currentQuestionIndex } = ctx.session;
 
-  if (currentSurveyId === undefined || currentQuestionIndex === undefined)
-    return;
+  if (currentSurveyId === undefined || currentQuestionIndex === undefined) return;
 
   const survey = await prisma.survey.findUnique({
     where: { id: currentSurveyId },
@@ -102,9 +147,7 @@ async function presentQuestion(ctx: MyContext) {
     case "SINGLE_CHOICE":
       keyboard = new InlineKeyboard();
       question.options.forEach((option) => {
-        keyboard!
-          .text(option.text, `answer_option_${question.id}_${option.id}`)
-          .row();
+        keyboard!.text(option.text, `answer_option_${question.id}_${option.id}`).row();
       });
       break;
     case "MULTIPLE_CHOICE":
@@ -113,12 +156,18 @@ async function presentQuestion(ctx: MyContext) {
       break;
   }
 
+  if (!question.isRequired) {
+    if (!keyboard) {
+      keyboard = new InlineKeyboard();
+    }
+    keyboard.row().text("➡️ Пропустить", `skip_question_${question.id}`);
+  }
+
   await ctx.reply(
-    `❓Вопрос ${currentQuestionIndex + 1}/${survey.questions.length}${!question.isRequired ? " (необязательный):" : ":"}\n\n*${question.text}*`,
-    {
-      parse_mode: "Markdown",
-      reply_markup: keyboard,
-    },
+      `❓ Вопрос ${currentQuestionIndex + 1}/${survey.questions.length}${!question.isRequired ? " (необязательный)" : ""}:\n\n*${question.text}*`, {
+        parse_mode: "Markdown",
+        reply_markup: keyboard,
+      },
   );
 }
 
@@ -128,10 +177,22 @@ bot.on("callback_query:data", async (ctx) => {
 
   if (data.startsWith("start_survey_")) {
     const surveyId = parseInt(data.replace("start_survey_", ""), 10);
-    ctx.session.currentSurveyId = surveyId;
-    ctx.session.currentQuestionIndex = 0;
-    ctx.session.answers = [];
-    await ctx.editMessageText("Отлично! Начинаем опрос...");
+    await ctx.deleteMessage();
+    await startSurveyFlow(ctx, surveyId);
+    return;
+  }
+
+  if (data.startsWith("skip_question_")) {
+    const [,,questionIdStr] = data.split("_")
+    const questionId = parseInt(questionIdStr, 10);
+    ctx.session.answers.push({
+      questionId,
+      textValue: undefined,
+      numberValue: undefined,
+      selectedOptionId: undefined,
+      chosenOptions: undefined});
+    ctx.session.currentQuestionIndex!++;
+    await ctx.editMessageText("Вопрос пропущен.");
     await presentQuestion(ctx);
     return;
   }
@@ -153,9 +214,7 @@ bot.on("callback_query:data", async (ctx) => {
     const questionId = parseInt(questionIdStr, 10);
 
     const chosenOptions = ctx.session.tempMultipleChoice || [];
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-    });
+    const question = await prisma.question.findUnique({ where: { id: questionId } });
     if (question?.isRequired && chosenOptions.length === 0) {
       await ctx.answerCallbackQuery({
         text: "Это обязательный вопрос, выберите хотя бы один вариант.",
@@ -186,9 +245,6 @@ bot.on("callback_query:data", async (ctx) => {
     }
     ctx.session.tempMultipleChoice = tempChoices;
 
-    console.log(questionId);
-    console.log(tempChoices);
-
     const question = await prisma.question.findUnique({
       where: { id: questionId },
       include: { options: { orderBy: { order: "asc" } } },
@@ -201,10 +257,26 @@ bot.on("callback_query:data", async (ctx) => {
   }
 });
 
+
+
 bot.on("message:text", async (ctx) => {
   const { currentSurveyId, currentQuestionIndex } = ctx.session;
   if (currentSurveyId === undefined || currentQuestionIndex === undefined)
     return;
+
+  if (ctx.message.text.toLowerCase() === '/skip') {
+    const survey = await prisma.survey.findUnique({
+      where: { id: currentSurveyId },
+      include: { questions: { select: { id: true, isRequired: true}, orderBy: { order: 'asc'}}}
+    });
+    const question = survey?.questions[currentQuestionIndex];
+    if (question && !question.isRequired) {
+      ctx.session.currentQuestionIndex!++;
+      await ctx.reply("Вопрос пропущен.");
+      await presentQuestion(ctx);
+      return;
+    }
+  }
 
   const survey = await prisma.survey.findUnique({
     where: { id: currentSurveyId },
@@ -227,18 +299,19 @@ bot.on("message:text", async (ctx) => {
     ctx.session.answers.push({ questionId: question.id, numberValue });
   } else {
     await ctx.reply(
-      "Пожалуйста, используйте кнопки для ответа на этот вопрос.",
+        "Пожалуйста, используйте кнопки для ответа на этот вопрос.",
     );
     return;
   }
 
   ctx.session.currentQuestionIndex!++;
+  await ctx.reply("Ответ принят!");
   await presentQuestion(ctx);
 });
 
 function buildMultipleChoiceKeyboard(
-  question: Question & { options: AnswerOption[] },
-  selectedIds: number[],
+    question: Question & { options: AnswerOption[] },
+    selectedIds: number[],
 ): InlineKeyboard {
   const keyboard = new InlineKeyboard();
   question.options.forEach((option) => {
@@ -263,6 +336,7 @@ async function finishSurvey(ctx: MyContext) {
         },
       });
 
+
       for (const answer of answers) {
         await tx.answer.create({
           data: {
@@ -272,12 +346,12 @@ async function finishSurvey(ctx: MyContext) {
             numberValue: answer.numberValue,
             selectedOptionId: answer.selectedOptionId,
             chosenOptions: answer.chosenOptions
-              ? {
+                ? {
                   create: answer.chosenOptions.map((optionId) => ({
                     optionId: optionId,
                   })),
                 }
-              : undefined,
+                : undefined,
           },
         });
       }
@@ -287,7 +361,7 @@ async function finishSurvey(ctx: MyContext) {
   } catch (error) {
     console.error("Failed to save survey results:", error);
     await ctx.reply(
-      "Произошла ошибка при сохранении ваших ответов. Пожалуйста, попробуйте пройти опрос позже.",
+        "Произошла ошибка при сохранении ваших ответов. Пожалуйста, попробуйте пройти опрос позже.",
     );
   } finally {
     ctx.session.currentSurveyId = undefined;
