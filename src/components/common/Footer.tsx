@@ -19,7 +19,7 @@ export default function Footer() {
           </div>
         </div>
         <Link href="https://github.com/syrok0010/Formtastic">
-          <Github className="h-8 w-8 text-muted-foreground cursor-pointer" />
+          <Github className="h-8 w-8 text-muted-foreground hover:text-blue-600 transition-colors duration-300 cursor-pointer" />
         </Link>
       </div>
     </footer>
