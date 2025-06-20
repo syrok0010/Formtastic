@@ -10,14 +10,14 @@ import { UserResponseCard } from "@/components/common/user-response-card";
 export default async function CompletedSurveyPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/");
   }
 
-  const userResponseId = parseInt(params.id, 10);
+  const userResponseId = parseInt((await params).id, 10);
   if (isNaN(userResponseId)) {
     notFound();
   }
