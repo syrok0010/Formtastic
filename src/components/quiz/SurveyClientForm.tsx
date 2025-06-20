@@ -124,7 +124,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
                         )}
 
                         {isFinished && (
-                            <Alert variant="success">
+                            <Alert>
                                 <AlertDescription>Вы успешно завершили опрос</AlertDescription>
                             </Alert>
                         )}
