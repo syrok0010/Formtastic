@@ -1,45 +1,45 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
   color?: string;
   className?: string;
   text?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
-  color = 'text-blue-600',
-  className = '',
+  size = "md",
+  color = "text-blue-600",
+  className = "",
   text,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
-      case 'sm':
-        return 'w-4 h-4';
-      case 'md':
-        return 'w-8 h-8';
-      case 'lg':
-        return 'w-12 h-12';
-      case 'xl':
-        return 'w-16 h-16';
+      case "sm":
+        return "w-4 h-4";
+      case "md":
+        return "w-8 h-8";
+      case "lg":
+        return "w-12 h-12";
+      case "xl":
+        return "w-16 h-16";
       default:
-        return 'w-8 h-8';
+        return "w-8 h-8";
     }
   };
 
   const getTextSize = () => {
     switch (size) {
-      case 'sm':
-        return 'text-sm';
-      case 'md':
-        return 'text-base';
-      case 'lg':
-        return 'text-lg';
-      case 'xl':
-        return 'text-xl';
+      case "sm":
+        return "text-sm";
+      case "md":
+        return "text-base";
+      case "lg":
+        return "text-lg";
+      case "xl":
+        return "text-xl";
       default:
-        return 'text-base';
+        return "text-base";
     }
   };
 
@@ -75,8 +75,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 };
 
 // Компонент для загрузки контента страницы
-export const PageLoader: React.FC<{ text?: string }> = ({ 
-  text = 'Загрузка...' 
+export const PageLoader: React.FC<{ text?: string }> = ({
+  text = "Загрузка...",
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -86,8 +86,8 @@ export const PageLoader: React.FC<{ text?: string }> = ({
 };
 
 // Компонент для загрузки внутри карточек
-export const CardLoader: React.FC<{ text?: string }> = ({ 
-  text = 'Загружаем данные...' 
+export const CardLoader: React.FC<{ text?: string }> = ({
+  text = "Загружаем данные...",
 }) => {
   return (
     <div className="flex items-center justify-center py-8">
@@ -98,7 +98,5 @@ export const CardLoader: React.FC<{ text?: string }> = ({
 
 // Компонент для кнопок с загрузкой
 export const ButtonLoader: React.FC = () => {
-  return (
-    <LoadingSpinner size="sm" className="mr-2" />
-  );
+  return <LoadingSpinner size="sm" className="mr-2" />;
 };

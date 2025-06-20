@@ -4,39 +4,40 @@ import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/common/Logo";
 import {
-  DropdownMenu, DropdownMenuContent,
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GalleryVerticalEnd, Menu, LogOut } from "lucide-react";
-import {UserRole} from "@/generated/prisma";
+import { UserRole } from "@/generated/prisma";
 
 export default async function Header() {
   const session = await auth();
-  const role = session?.user.role
+  const role = session?.user.role;
   let surveysUrl = "/";
   let navWord = "Опросы";
   if (role === UserRole.SURVEY_CREATOR) {
     surveysUrl = "/admin";
   } else if (role === UserRole.SURVEY_RESPONDENT) {
     surveysUrl = "/account";
-    navWord = "Пройденные опросы"
+    navWord = "Пройденные опросы";
   }
 
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex justify-between items-center h-16 relative">
-          <Logo/>
+          <Logo />
 
           {!!session && (
             <>
               <nav className="hidden md:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
                 <Link
-                    href={surveysUrl}
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 text-base font-medium transition-colors"
+                  href={surveysUrl}
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 text-base font-medium transition-colors"
                 >
                   {navWord}
                 </Link>
@@ -58,7 +59,7 @@ export default async function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button>
-                  <Menu className="h-6 w-6 cursor-pointer text-gray-400 hover:text-gray-500"/>
+                  <Menu className="h-6 w-6 cursor-pointer text-gray-400 hover:text-gray-500" />
                   <span className="sr-only">Открыть меню</span>
                 </button>
               </DropdownMenuTrigger>
@@ -71,18 +72,18 @@ export default async function Header() {
                     {navWord}
                   </DropdownMenuItem>
                 </Link>
-                  <DropdownMenuItem>
-                    <form
-                        action={async () => {
-                          "use server";
-                          await signOut();
-                        }}
-                        className="flex gap-2 items-center"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <button>Выйти</button>
-                    </form>
-                  </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await signOut();
+                    }}
+                    className="flex gap-2 items-center"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <button>Выйти</button>
+                  </form>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
