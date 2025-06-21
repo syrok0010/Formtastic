@@ -129,7 +129,7 @@ export function SurveyClientForm({ survey }: { survey: FullSurvey }) {
           <Alert variant="positive">
             <AlertTitle>Опрос завершен</AlertTitle>
             <AlertDescription>
-              Ваш ответ на вопрос успешно сохранен
+              Ваш ответ на опрос успешно сохранен
             </AlertDescription>
           </Alert>
         )}

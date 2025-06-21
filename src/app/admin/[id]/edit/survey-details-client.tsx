@@ -49,6 +49,7 @@ import {
   localizedSurveyStatuses,
 } from "@/lib/localization";
 import { useViewTransition } from "@/hooks/use-view-transition";
+import { ShareButton } from "@/components/ui/share-button";
 
 interface SurveyDetailsClientProps {
   initialSurvey: SurveyDetailPayload;
@@ -188,6 +189,8 @@ export function SurveyDetailsClient({
     setSurvey((prev) => ({ ...prev, questions: updatedQuestions }));
   };
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
   return (
     <form action={formAction} className="max-w-5xl space-y-8 mx-auto">
       <input type="hidden" name="surveyData" value={JSON.stringify(survey)} />
@@ -196,7 +199,10 @@ export function SurveyDetailsClient({
         <h1 className="text-3xl font-bold tracking-tight">
           Редактирование опроса
         </h1>
-        <SubmitButton />
+        <div className="flex items-center gap-2">
+          <ShareButton surveyId={survey.id} appUrl={appUrl} />
+          <SubmitButton />
+        </div>
       </div>
 
       {formState?.message && (
