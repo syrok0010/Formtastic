@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ---- Модели для Auth.js (NextAuth.js) ----
+// Модели для Auth.js (NextAuth.js)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -47,7 +47,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ---- Доменные модели ----
+// Доменные модели
 
 enum UserRole {
   SURVEY_CREATOR
