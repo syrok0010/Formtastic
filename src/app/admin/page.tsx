@@ -102,15 +102,6 @@ export default async function AllSurveys() {
                         </DropdownMenuItem>
                       </Link>
                       <DeleteSurveyMenuItem surveyId={survey.id} status={survey.status} />
-                      {/*<DropdownMenuItem disabled={survey.status !== SurveyStatus.DRAFT} className="!pointer-events-none text-red-600 focus:text-red-600 focus:bg-red-50">*/}
-                      {/*  <form*/}
-                      {/*      action={async () => {"use server"; await deleteSurveyAction(survey.id);}}*/}
-                      {/*      className="flex gap-2 items-center pointer-events-auto"*/}
-                      {/*  >*/}
-                      {/*    <Trash2 className="mr-2 h-4 w-4" />*/}
-                      {/*    <button>Удалить</button>*/}
-                      {/*  </form>*/}
-                      {/*</DropdownMenuItem>*/}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>

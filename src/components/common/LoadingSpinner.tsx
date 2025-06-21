@@ -74,7 +74,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   );
 };
 
-// Компонент для загрузки контента страницы
 export const PageLoader: React.FC<{ text?: string }> = ({
   text = "Загрузка...",
 }) => {
@@ -85,7 +84,6 @@ export const PageLoader: React.FC<{ text?: string }> = ({
   );
 };
 
-// Компонент для загрузки внутри карточек
 export const CardLoader: React.FC<{ text?: string }> = ({
   text = "Загружаем данные...",
 }) => {
@@ -96,7 +94,6 @@ export const CardLoader: React.FC<{ text?: string }> = ({
   );
 };
 
-// Компонент для кнопок с загрузкой
 export const ButtonLoader: React.FC = () => {
   return <LoadingSpinner size="sm" className="mr-2" />;
 };
